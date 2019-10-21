@@ -1,36 +1,47 @@
 <template>
   <div class="setting">
-    <h1>学习相关</h1>
-    <div class="rewarditem" v-for="(item, index) in learnItems" :key="index">
-      <el-checkbox-group v-model="chosedItem" @change="choose">
-        <el-checkbox :label="item">
-          <el-input v-model="item.project" :key="index"></el-input>
-          {{'——'+item.reward+'块！'}}
-        </el-checkbox>
-      </el-checkbox-group>
-    </div>
-    <!-- <h1>生活相关</h1>
-    <div class="rewarditem" v-for="(item, index) in lifeItems" :key="index">
-      <el-checkbox-group v-model="chosedItem">
-        <el-checkbox>
-          <el-input v-model="item.project"></el-input>
-          {{'——'+item.reward+'块！'}}
-        </el-checkbox>
-      </el-checkbox-group>
-    </div>-->
+    <el-button type="primary" @click="dialogVisible = true">新增</el-button>
+    <el-table
+      ref="multipleTable"
+      :data="rewardItems"
+      style="width: 100%"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="55"></el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column prop="project" label="项目" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="reward" label="奖励" width="120"></el-table-column>
+      <el-table-column
+        prop="type"
+        label="标签"
+        width="100"
+        :filters="[{ text: '工作学习', value: 0 }, { text: '生活', value: 1 }]"
+        :filter-method="filterTag"
+        filter-placement="bottom-end"
+      >
+        <template slot-scope="scope">
+          <el-tag v-if="!scope.row.type" type="primary" disable-transitions>工作学习</el-tag>
+          <el-tag v-else type="success" disable-transitions>生活</el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
+    <el-button type="primary" @click="saveWeekTarget">保存为本周目标</el-button>
     <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
       <el-form :model="addItem" class="demo-form-inline">
         <el-form-item label="项目">
           <el-input v-model="addItem.project" placeholder="输入项目内容"></el-input>
         </el-form-item>
         <el-form-item label="奖励">
-          <el-input-number v-model="addItem.reward" :step="10"></el-input-number>
+          <el-input-number v-model="addItem.rewards" :step="10"></el-input-number>
         </el-form-item>
         <el-button type="primary" @click="save">保存</el-button>
       </el-form>
     </el-dialog>
-    <el-button type="primary" @click="dialogVisible = true">新增</el-button>
-    {{chosedItem}}
   </div>
 </template>
 
@@ -42,28 +53,25 @@ export default {
     return {
       dialogVisible: false,
       addItem: {},
-      learnItems: [],
-      lifeItems: [],
-      chosedItem: []
+      rewardItems: [],
+      weekTarget: []
     };
   },
   methods: {
     // 新增项目、展示项目（多选）、每周已选
     // 编辑内容没保存
-    choose() {},
+    handleSelectionChange(val) {
+      this.weekTarget = val;
+    },
     save() {
       if (this.addItem.project !== "") {
         this.learnItems.push(this.addItem);
-        // localStorage.setItem("addItem", JSON.stringify(this.addItem));
-        localStorage.setItem("learnItems", JSON.stringify(this.learnItems));
       } else {
         this.$message.error("项目内容不能为空");
       }
       this.dialogVisible = false;
     },
     detail() {
-      // this.learnItems = JSON.parse(localStorage.getItem("addItem")); removeItem
-      this.learnItems = JSON.parse(localStorage.getItem("learnItems")) || [];
       const temp = [];
       this.learnItems.forEach(item => {
         if (item.project !== "") {
@@ -71,13 +79,20 @@ export default {
         }
       });
       this.learnItems = temp;
-      console.log("this.learnItems", this.learnItems);
-    }
+    },
+    saveWeekTarget() {}
   },
   created() {
-    if (JSON.parse(localStorage.getItem("learnItems")) instanceof Array) {
-      this.detail();
-    }
+    // this.detail();
+    this.rewardItems = [
+      { project: "工作项目", rewards: 200, type: 0 },
+      { project: "奖励系统", rewards: 500, type: 0 },
+      { project: "冴羽深入js系列", rewards: 100, type: 0 },
+      { project: "认真吃饭", rewards: 100, type: 1 },
+      { project: "早睡", rewards: 100, type: 1 },
+      { project: "保持运动", rewards: 100, type: 1 },
+      { project: "画画", rewards: 100, type: 1 }
+    ];
   }
 };
 </script>

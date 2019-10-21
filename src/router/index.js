@@ -8,7 +8,7 @@ export default [{
   },
   {
     name: 'rewardRecord',
-    path: '/',
+    path: '/rewardRecord',
     meta: {
       title: '奖励记录'
     },
